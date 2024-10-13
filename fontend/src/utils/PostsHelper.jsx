@@ -7,7 +7,11 @@ export const columns = [
     {
       name: "Summary",
       selector: (row) => row.Summary,
-      sortable: true,
+      cell: (row) => (
+        <div className="data-table-content-cell">
+          {row.Summary}
+        </div>
+      ),
     },
     {
       name: "Content",

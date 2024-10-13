@@ -5,14 +5,21 @@ import axios from "axios";
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
+  const [timeQuery, setTimeQuery] = useState("");
 
+  //Lọc dữ liệu
   const filterPosts = (e) => {
+    const startTime = Date.now(); 
     const records = posts.filter((pos) =>
-      pos.Title.toLowerCase().includes(e.target.value.toLowerCase())
+      pos.Title.toLowerCase().replace(/\s+/g, ' ').includes(e.target.value.trim().replace(/\s+/g, ' ').toLowerCase())
     );
+    const endTime = Date.now();
+    const filterTime = endTime - startTime;
     setFilteredPosts(records);
+    setTimeQuery(filterTime);
   };
 
+  // Fetch data
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -21,9 +28,9 @@ const Home = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        
-        if (response.data.success) {
+        console.log(response);
 
+        if (response.data.success) {
           const data = await response.data.posts.map((post) => ({
             Title: post.Title,
             Summary: post.Summary,
@@ -31,6 +38,7 @@ const Home = () => {
           }));
           setPosts(data);
           setFilteredPosts(data);
+          setTimeQuery(response.data.queryTime);
         }
       } catch (error) {
         if (error.response && !error.response.data.success) {
@@ -52,9 +60,10 @@ const Home = () => {
           className="px-4 py-0.5 rounded border"
           onChange={filterPosts}
         />
+        <div className="px-4 font-bold">Thời gian trả về: {timeQuery} ms</div>
       </div>
       <div className="mt-5">
-        <DataTable columns={columns} data = {filteredPosts} pagination />
+        <DataTable columns={columns} data={filteredPosts} pagination />
       </div>
     </div>
   );
